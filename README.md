@@ -119,6 +119,10 @@ Rolo_IP_Dns_CH/
 ├── src/                         # Application source code
 │   └── Rolo_IP_dns_CH.py         # Main entry point (UI logic to be split out later)
 │
+|
+|
+|──assets/
+    └──screenshots
 ```
 
 | Section | Description |
