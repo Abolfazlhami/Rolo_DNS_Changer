@@ -36,7 +36,7 @@ A simple and practical Windows application for **viewing network adapter informa
 
 ## 🖼️ Screenshots
 
-> Screenshots will be added here once available (see `assets/screenshots/`).
+> Screenshots will be added here once available
 
 | Main Screen | Scan Results | DNS Change |
 |:---:|:---:|:---:|
