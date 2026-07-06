@@ -92,7 +92,7 @@ APP_VERSION_TEXT = "Rolo_IP_Dns_CH V1.0.0"   # برچسب نسخه گوشه پا
 
 IS_WINDOWS = platform.system() == "Windows"
 
-SCAN_STEPS = ["IP", "IP4", "IP6", "Ping", "DNS", "Mac"]
+SCAN_STEPS = ["IP", "IPv4", "IPv6", "Ping", "DNS", "Mac"]
 
 
 # ==============================================================================
