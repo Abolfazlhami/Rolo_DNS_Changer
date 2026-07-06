@@ -40,7 +40,7 @@ A simple and practical Windows application for **viewing network adapter informa
 
 | Main Screen | Scan Results | DNS Change |
 |:---:|:---:|:---:|
-| *(coming soon)* | *(coming soon)* | *(coming soon)* |
+| <img width="200" height="200" alt="Screenshot 2026-07-06 152836" src="https://github.com/user-attachments/assets/06d89f04-ca8b-4fa3-8325-fed839f3609c" />| *(coming soon)* | *(coming soon)* |
 
 ---
 
