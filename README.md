@@ -119,19 +119,6 @@ Rolo_IP_Dns_CH/
 ├── src/                         # Application source code
 │   └── Rolo_IP_dns_CH.py         # Main entry point (UI logic to be split out later)
 │
-├── build/                       # Compiled executable output
-│   └── Rolo_IP_Dns_CH.exe        # (added once the EXE build is ready)
-│
-├── assets/                      # Visual/media assets
-│   ├── icons/
-│   │   └── icon.ico              # Application icon
-│   └── screenshots/               # UI screenshots used in this README
-│       ├── main_screen.png
-│       ├── scan_result.png
-│       └── dns_change.png
-|
-└── docs/                        # Additional documentation
-    └── CHANGELOG.md              # Version history
 ```
 
 | Section | Description |
