@@ -142,7 +142,7 @@ Rolo_IP_Dns_CH/
 
 ## 📌 Changelog
 
-See [`docs/CHANGELOG.md`](docs/CHANGELOG.md) for the full version history.
+
 
 **Current version:** `Rolo_IP_Dns_CH V1.0.0`
 
