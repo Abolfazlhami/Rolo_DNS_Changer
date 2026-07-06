@@ -129,7 +129,7 @@ Rolo_IP_Dns_CH/
 │       ├── main_screen.png
 │       ├── scan_result.png
 │       └── dns_change.png
-│
+|
 └── docs/                        # Additional documentation
     └── CHANGELOG.md              # Version history
 ```
@@ -149,10 +149,7 @@ Rolo_IP_Dns_CH/
 - [x] Scan network adapters
 - [x] Change DNS (Primary + Secondary)
 - [x] Change IP
-- [ ] Split UI code into a separate module
-- [ ] Add standalone EXE build
-- [ ] Add application icon
-- [ ] Add UI screenshots
+
 
 ---
 
