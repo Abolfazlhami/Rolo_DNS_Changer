@@ -122,7 +122,7 @@ Rolo_IP_Dns_CH/
 |
 |
 |──assets/
-    └──screenshots
+    └── screenshots
 ```
 
 | Section | Description |
