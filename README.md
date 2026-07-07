@@ -84,11 +84,15 @@ A simple and practical Windows application for **viewing network adapter informa
    ```
 
 > ⚠️ Since changing DNS/IP relies on `netsh` commands, the app automatically triggers a Windows UAC prompt on startup requesting **Administrator** access. Click **Yes** so DNS/IP changes work properly.
+### Option 2: Run the standalone executable (EXE)
 
-### Option 2: Run the executable (EXE)
+You don't need Python or any dependencies installed to run **RDNSChange**. 
 
-> 🚧 A standalone `.exe` build will be added to the `build/` folder soon — no Python installation will be required to run it.
+1. Go to the [Releases](https://github.com/YOUR_USERNAME/YOUR_REPO_NAME/releases) page.
+2. Download the latest `RDNSChange.exe` file.
+3. Double-click to run the application.
 
+> ⚠️ **Note:** Since the application executes `netsh` commands to change your network configuration, Windows will show a UAC prompt asking for **Administrator** permissions. Click **Yes** to allow the program to function properly.
 ---
 
 ## 📖 Usage
