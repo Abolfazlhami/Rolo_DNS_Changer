@@ -80,7 +80,7 @@ A simple and practical Windows application for **viewing network adapter informa
 
 4. Run the application:
    ```bash
-   python src/Rolo_IP_dns_CH.py
+   python src/Main.py
    ```
 
 > ⚠️ Since changing DNS/IP relies on `netsh` commands, the app automatically triggers a Windows UAC prompt on startup requesting **Administrator** access. Click **Yes** so DNS/IP changes work properly.
