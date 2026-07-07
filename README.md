@@ -80,7 +80,7 @@ A simple and practical Windows application for **viewing network adapter informa
 
 4. Run the application:
    ```bash
-   python src/Main.py
+   python src/main.py
    ```
 
 > ⚠️ Since changing DNS/IP relies on `netsh` commands, the app automatically triggers a Windows UAC prompt on startup requesting **Administrator** access. Click **Yes** so DNS/IP changes work properly.
@@ -108,6 +108,8 @@ A simple and practical Windows application for **viewing network adapter informa
 
 ## 🛠️ Project Structure
 
+The application code has been split into separate modules by responsibility, instead of one large file:
+
 ```
 Rolo_IP_Dns_CH/
 │
@@ -117,21 +119,27 @@ Rolo_IP_Dns_CH/
 ├── .gitignore                   # Ignored files/folders (Python template)
 │
 ├── src/                         # Application source code
-│   └── Rolo_IP_dns_CH.py         # Main entry point (UI logic to be split out later)
+│   ├── main.py                  # Entry point — run this file to start the app
+│   ├── config.py                # Colors, fonts, and visual/general constants
+│   ├── admin_utils.py           # Automatic Administrator (UAC) elevation
+│   ├── network_utils.py         # Adapter scanning, DNS/IP read & change functions
+│   ├── ui_widgets.py            # Custom widgets: rounded button, spinner, rounded combobox
+│   └── app.py                   # Main application class (WifiApp) and screen logic
 │
-|
-|
-|──assets/
-    └── screenshots
+└── assets/
+    └── screenshots/
 ```
 
-| Section | Description |
+| File | Description |
 |---|---|
-| Admin Elevation | Automatic Administrator (UAC) elevation |
-| Theme & Constants | Colors, fonts, and visual constants |
-| Network Helper Functions | Functions to scan adapters and read/change DNS and IP |
-| UI Helper Widgets | Rounded button, loading spinner, custom rounded combobox |
-| Main Application Class | The main app class and screen logic |
+| `main.py` | Entry point of the app; calls `ensure_admin()` then launches `WifiApp` |
+| `config.py` | Colors, fonts, and other visual/general constants |
+| `admin_utils.py` | Automatic Administrator (UAC) elevation |
+| `network_utils.py` | Functions to scan adapters and read/change DNS and IP |
+| `ui_widgets.py` | Rounded button, loading spinner, custom rounded combobox |
+| `app.py` | The main app class (`WifiApp`) — screens, scan logic, save DNS/IP logic |
+
+> ℹ️ All files inside `src/` depend on each other via `import`, so they must stay together in the same folder.
 
 ---
 
@@ -140,7 +148,7 @@ Rolo_IP_Dns_CH/
 - [x] Scan network adapters
 - [x] Change DNS (Primary + Secondary)
 - [x] Change IP
-
+- [x] Split code into separate modules
 
 ---
 
