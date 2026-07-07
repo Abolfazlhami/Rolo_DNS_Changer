@@ -8,6 +8,7 @@
 import tkinter as tk
 import threading
 import time
+import os
 
 from config import (BG_COLOR, CARD_COLOR, NAVY_LIGHT, GREEN, TEXT_COLOR,
                      MUTED_COLOR, FONT_MAIN, APP_VERSION_TEXT, SCAN_STEPS)
@@ -22,6 +23,7 @@ class WifiApp(tk.Tk):
         self.geometry("500x500")
         self.resizable(False, False)
         self.configure(bg=BG_COLOR)
+        self._set_window_icon()
 
         self.current_adapter = None
         self.current_info = {}
@@ -29,6 +31,37 @@ class WifiApp(tk.Tk):
         self.scanning = False
 
         self._build_main_screen()
+
+    def _set_window_icon(self):
+        """
+        تنظیم آیکون پنجره از فایل PNG با روش iconphoto (به‌جای iconbitmap).
+        روش iconbitmap با فایل‌های ICO مدرن (که سایز 256 رو با فرمت PNG داخل خودش
+        ذخیره می‌کنن) روی بعضی سیستم‌ها کرش می‌کنه؛ iconphoto این مشکل رو نداره.
+        اگه فایل آیکون پیدا نشه یا مشکلی پیش بیاد، برنامه بدون آیکون سفارشی
+        (با آیکون پیش‌فرض tkinter) بالا میاد و کرش نمی‌کنه.
+        """
+        try:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            # چند مسیر رایج که ممکنه فایل آیکون توش باشه رو چک می‌کنیم
+            candidate_paths = [
+                os.path.join(base_dir, "rolo_icon.png"),                             # کنار app.py
+                os.path.join(base_dir, "assets", "rolo_icon.png"),                   # src/assets/
+                os.path.join(base_dir, "assets", "icons", "rolo_icon.png"),          # src/assets/icons/
+                os.path.join(base_dir, "..", "assets", "rolo_icon.png"),             # پوشه assets کنار src/
+                os.path.join(base_dir, "..", "assets", "icons", "rolo_icon.png"),    # پوشه assets/icons کنار src/
+            ]
+            icon_path = next((p for p in candidate_paths if os.path.exists(p)), None)
+            if icon_path:
+                # نگه داشتن رفرنس روی self ضروریه، وگرنه garbage collector
+                # عکس رو پاک می‌کنه و آیکون محو/کرش می‌شه
+                self._icon_img = tk.PhotoImage(file=icon_path)
+                self.iconphoto(True, self._icon_img)
+            else:
+                print("هشدار: فایل rolo_icon.png پیدا نشد. مسیرهای بررسی‌شده:")
+                for p in candidate_paths:
+                    print("  -", os.path.abspath(p))
+        except Exception as e:
+            print("هشدار: تنظیم آیکون برنامه با خطا مواجه شد:", e)
 
     # --------------------------------------------------------------------
     # [6.1] BUILD: SELECT SCREEN  (انتخاب آداپتور + دکمه اسکن)
@@ -101,8 +134,41 @@ class WifiApp(tk.Tk):
     # [6.2] BUILD: RESULT SCREEN  (نمایش IP / IPv6 / MAC / Ping / DNS)
     # --------------------------------------------------------------------
     def _build_result_widgets(self):
+        # ---- Canvas + Scrollbar عمودی: چون همه‌ی فیلدها توی پنجره 500px جا نمی‌شن،
+        # این بخش قابل اسکرول می‌شه تا بشه به "Change IP" و دکمه "Save IP" هم رسید.
+        # ارتفاع Canvas محدوده، پس اسکرول فقط به‌اندازه‌ی محتوای اضافه پیش می‌ره، نه بیشتر.
+        canvas_width = 400
+        canvas_height = 430  # کمی کمتر از ارتفاع پنجره (500) تا جا برای بقیه اجزا بمونه
+
+        canvas = tk.Canvas(self.result_frame, bg=BG_COLOR, width=canvas_width,
+                            height=canvas_height, highlightthickness=0)
+        scrollbar = tk.Scrollbar(self.result_frame, orient="vertical", command=canvas.yview)
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
         # کارت وسط‌چین با عرض ثابت که کل محتوای نتایج داخلش قرار می‌گیرد
-        f = tk.Frame(self.result_frame, bg=BG_COLOR, width=380)
+        f = tk.Frame(canvas, bg=BG_COLOR, width=380)
+        window_id = canvas.create_window((canvas_width / 2, 0), window=f, anchor="n")
+
+        def _on_frame_configure(event):
+            # اسکرول‌ریجن دقیقاً به اندازه محتوای واقعی تنظیم می‌شه (نه بیشتر)
+            canvas.configure(scrollregion=canvas.bbox("all"))
+        f.bind("<Configure>", _on_frame_configure)
+
+        # اسکرول با چرخ ماوس، فقط وقتی موس روی این بخش هست (تداخلی با بقیه صفحه نداره)
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+        def _bind_mousewheel(event):
+            canvas.bind_all("<MouseWheel>", _on_mousewheel)
+
+        def _unbind_mousewheel(event):
+            canvas.unbind_all("<MouseWheel>")
+
+        canvas.bind("<Enter>", _bind_mousewheel)
+        canvas.bind("<Leave>", _unbind_mousewheel)
 
         def row(label_text):
             tk.Label(f, text=label_text, bg=BG_COLOR, fg=MUTED_COLOR,
@@ -164,8 +230,6 @@ class WifiApp(tk.Tk):
                                  bg=GREEN, fg="white", font=("Segoe UI", 8, "bold"),
                                  relief="flat", padx=8, pady=2, cursor="hand2")
         save_ip_btn.pack(anchor="e", pady=(2, 4))
-
-        f.pack()
 
     # --------------------------------------------------------------------
     # [6.3] SCAN LOGIC  (اسکن، انیمیشن لودینگ، fade متن مراحل)
