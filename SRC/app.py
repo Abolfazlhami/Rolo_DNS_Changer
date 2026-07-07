@@ -19,7 +19,7 @@ from network_utils import list_adapters, get_adapter_info, get_adapter_dns, ping
 class WifiApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Rolo Scaner")
+        self.title("Rolo Scanner")
         self.geometry("500x500")
         self.resizable(False, False)
         self.configure(bg=BG_COLOR)
@@ -33,51 +33,37 @@ class WifiApp(tk.Tk):
         self._build_main_screen()
 
     def _set_window_icon(self):
-        """
-        تنظیم آیکون پنجره از فایل PNG با روش iconphoto (به‌جای iconbitmap).
-        روش iconbitmap با فایل‌های ICO مدرن (که سایز 256 رو با فرمت PNG داخل خودش
-        ذخیره می‌کنن) روی بعضی سیستم‌ها کرش می‌کنه؛ iconphoto این مشکل رو نداره.
-        اگه فایل آیکون پیدا نشه یا مشکلی پیش بیاد، برنامه بدون آیکون سفارشی
-        (با آیکون پیش‌فرض tkinter) بالا میاد و کرش نمی‌کنه.
-        """
         try:
             base_dir = os.path.dirname(os.path.abspath(__file__))
-            # چند مسیر رایج که ممکنه فایل آیکون توش باشه رو چک می‌کنیم
             candidate_paths = [
-                os.path.join(base_dir, "rolo_icon.png"),                             # کنار app.py
-                os.path.join(base_dir, "assets", "rolo_icon.png"),                   # src/assets/
-                os.path.join(base_dir, "assets", "icons", "rolo_icon.png"),          # src/assets/icons/
-                os.path.join(base_dir, "..", "assets", "rolo_icon.png"),             # پوشه assets کنار src/
-                os.path.join(base_dir, "..", "assets", "icons", "rolo_icon.png"),    # پوشه assets/icons کنار src/
+                os.path.join(base_dir, "rolo_icon.png"),
+                os.path.join(base_dir, "assets", "rolo_icon.png"),
+                os.path.join(base_dir, "assets", "icons", "rolo_icon.png"),
+                os.path.join(base_dir, "..", "assets", "rolo_icon.png"),
+                os.path.join(base_dir, "..", "assets", "icons", "rolo_icon.png"),
             ]
             icon_path = next((p for p in candidate_paths if os.path.exists(p)), None)
             if icon_path:
-                # نگه داشتن رفرنس روی self ضروریه، وگرنه garbage collector
-                # عکس رو پاک می‌کنه و آیکون محو/کرش می‌شه
                 self._icon_img = tk.PhotoImage(file=icon_path)
                 self.iconphoto(True, self._icon_img)
             else:
-                print("هشدار: فایل rolo_icon.png پیدا نشد. مسیرهای بررسی‌شده:")
+                print("Warning: rolo_icon.png not found. Checked paths:")
                 for p in candidate_paths:
                     print("  -", os.path.abspath(p))
         except Exception as e:
-            print("هشدار: تنظیم آیکون برنامه با خطا مواجه شد:", e)
+            print("Warning: Failed to set application icon:", e)
 
-    # --------------------------------------------------------------------
-    # [6.1] BUILD: SELECT SCREEN  (انتخاب آداپتور + دکمه اسکن)
-    # --------------------------------------------------------------------
     def _build_main_screen(self):
-        # ظرف اصلی؛ همه صفحات (انتخاب/لودینگ/نتیجه) داخل این با place وسط‌چین می‌شوند
         self.container = tk.Frame(self, bg=BG_COLOR, width=500, height=500)
         self.container.pack(fill="both", expand=True)
 
-        # ---- صفحه انتخاب + دکمه اسکن (وسط‌چین) ----
         self.select_frame = tk.Frame(self.container, bg=BG_COLOR)
 
-        tk.Label(self.select_frame, text="Rolo Scaner", bg=BG_COLOR,
+        tk.Label(self.select_frame, text="Rolo Scanner", bg=BG_COLOR,
                  fg=TEXT_COLOR, font=("Segoe UI", 16, "bold")).pack(pady=(0, 25))
 
-        tk.Label(self.select_frame, text="انتخاب کارت شبکه", bg=BG_COLOR,
+        # تغییر متن به انگلیسی
+        tk.Label(self.select_frame, text="Select Network Adapter", bg=BG_COLOR,
                  fg=MUTED_COLOR, font=FONT_MAIN).pack(pady=(0, 8))
 
         self.adapter_var = tk.StringVar()
@@ -86,7 +72,6 @@ class WifiApp(tk.Tk):
         self.adapter_combo.pack(pady=(0, 30))
         self._refresh_adapters()
 
-        # ---- دکمه SCAN: سبز عادی -> سورمه‌ای روشن در هاور، با ترانزیشن نرم ----
         RoundButton(self.select_frame, "SCAN", self._start_scan,
                     width=150, height=46,
                     fill_normal=GREEN, fill_hover=NAVY_LIGHT,
@@ -95,7 +80,6 @@ class WifiApp(tk.Tk):
                     text_color_normal="#ffffff", text_color_hover="#ffffff"
                     ).pack(pady=(0, 14))
 
-        # ---- دکمه REFRESH: زرد -> قرمز در هاور، با لایه بیرونی سفید ----
         RoundButton(self.select_frame, "REFRESH", self._refresh_adapters,
                     width=130, height=38, radius=19,
                     fill_normal="#f1c40f", fill_hover="#e74c3c",
@@ -106,7 +90,6 @@ class WifiApp(tk.Tk):
 
         self.select_frame.place(relx=0.5, rely=0.5, anchor="center")
 
-        # ---- فریم لودینگ (وسط‌چین، مخفی) ----
         self.loading_frame = tk.Frame(self.container, bg=BG_COLOR)
         self.spinner = Spinner(self.loading_frame, size=70)
         self.spinner.pack(pady=(0, 18))
@@ -114,11 +97,9 @@ class WifiApp(tk.Tk):
                                        fg=TEXT_COLOR, font=("Segoe UI", 13, "bold"))
         self.loading_label.pack()
 
-        # ---- فریم نتایج (وسط‌چین، مخفی) ----
         self.result_frame = tk.Frame(self.container, bg=BG_COLOR)
         self._build_result_widgets()
 
-        # ---- برچسب نسخه؛ گوشه پایین سمت راست، همیشه روی صفحه باقی می‌ماند ----
         self.version_label = tk.Label(self.container, text=APP_VERSION_TEXT,
                                        bg=BG_COLOR, fg=MUTED_COLOR,
                                        font=("Segoe UI", 8))
@@ -130,15 +111,9 @@ class WifiApp(tk.Tk):
         if adapters:
             self.adapter_combo.set_current(0)
 
-    # --------------------------------------------------------------------
-    # [6.2] BUILD: RESULT SCREEN  (نمایش IP / IPv6 / MAC / Ping / DNS)
-    # --------------------------------------------------------------------
     def _build_result_widgets(self):
-        # ---- Canvas + Scrollbar عمودی: چون همه‌ی فیلدها توی پنجره 500px جا نمی‌شن،
-        # این بخش قابل اسکرول می‌شه تا بشه به "Change IP" و دکمه "Save IP" هم رسید.
-        # ارتفاع Canvas محدوده، پس اسکرول فقط به‌اندازه‌ی محتوای اضافه پیش می‌ره، نه بیشتر.
         canvas_width = 400
-        canvas_height = 430  # کمی کمتر از ارتفاع پنجره (500) تا جا برای بقیه اجزا بمونه
+        canvas_height = 430
 
         canvas = tk.Canvas(self.result_frame, bg=BG_COLOR, width=canvas_width,
                             height=canvas_height, highlightthickness=0)
@@ -148,16 +123,13 @@ class WifiApp(tk.Tk):
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-        # کارت وسط‌چین با عرض ثابت که کل محتوای نتایج داخلش قرار می‌گیرد
         f = tk.Frame(canvas, bg=BG_COLOR, width=380)
         window_id = canvas.create_window((canvas_width / 2, 0), window=f, anchor="n")
 
         def _on_frame_configure(event):
-            # اسکرول‌ریجن دقیقاً به اندازه محتوای واقعی تنظیم می‌شه (نه بیشتر)
             canvas.configure(scrollregion=canvas.bbox("all"))
         f.bind("<Configure>", _on_frame_configure)
 
-        # اسکرول با چرخ ماوس، فقط وقتی موس روی این بخش هست (تداخلی با بقیه صفحه نداره)
         def _on_mousewheel(event):
             canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
@@ -195,13 +167,14 @@ class WifiApp(tk.Tk):
                                     font=FONT_MAIN, anchor="w")
         self.ping_label.pack(fill="x", ipady=5)
 
-        row("DNS اصلی (قابل تغییر)")
+        # تغییر متون فارسی جدول به انگلیسی
+        row("Primary DNS (Editable)")
         self.dns_entry = tk.Entry(f, font=FONT_MAIN, justify="center",
                                    bg=CARD_COLOR, fg=TEXT_COLOR,
                                    insertbackground=TEXT_COLOR, relief="flat")
         self.dns_entry.pack(fill="x", ipady=5)
 
-        row("DNS ثانویه (اختیاری)")
+        row("Secondary DNS (Optional)")
         self.dns2_entry = tk.Entry(f, font=FONT_MAIN, justify="center",
                                     bg=CARD_COLOR, fg=TEXT_COLOR,
                                     insertbackground=TEXT_COLOR, relief="flat")
@@ -216,7 +189,7 @@ class WifiApp(tk.Tk):
                                   relief="flat", padx=8, pady=2, cursor="hand2")
         save_dns_btn.pack(anchor="e", pady=(2, 10))
 
-        row("Change IP (دستی)")
+        row("Change IP (Manual)")
         self.new_ip_entry = tk.Entry(f, font=FONT_MAIN, justify="center",
                                       bg=CARD_COLOR, fg=TEXT_COLOR,
                                       insertbackground=TEXT_COLOR, relief="flat")
@@ -231,9 +204,6 @@ class WifiApp(tk.Tk):
                                  relief="flat", padx=8, pady=2, cursor="hand2")
         save_ip_btn.pack(anchor="e", pady=(2, 4))
 
-    # --------------------------------------------------------------------
-    # [6.3] SCAN LOGIC  (اسکن، انیمیشن لودینگ، fade متن مراحل)
-    # --------------------------------------------------------------------
     def _start_scan(self):
         adapter = self.adapter_var.get()
         if not adapter:
@@ -259,7 +229,6 @@ class WifiApp(tk.Tk):
         self.after(650, self._cycle_step_text)
 
     def _fade_text(self, new_text):
-        # انیمیشن ساده fade: محو شدن متن قبلی و پررنگ شدن متن بعدی
         steps = 8
 
         def fade_out(i=0):
@@ -284,7 +253,7 @@ class WifiApp(tk.Tk):
         info = get_adapter_info(adapter)
         info["dns"], info["dns2"] = get_adapter_dns(adapter)
         info["ping"] = ping_host()
-        time.sleep(3.2)  # اجازه بده انیمیشن مراحل کامل دیده شود
+        time.sleep(3.2)
         self.after(0, lambda: self._show_results(info))
 
     def _show_results(self, info):
@@ -313,22 +282,20 @@ class WifiApp(tk.Tk):
 
         self.result_frame.place(relx=0.5, rely=0.5, anchor="center")
 
-    # --------------------------------------------------------------------
-    # [6.4] SAVE DNS / SAVE IP  (ذخیره تنظیمات روی آداپتور)
-    # --------------------------------------------------------------------
     def _save_dns(self):
         new_dns = self.dns_entry.get().strip()
-        new_dns2 = self.dns2_entry.get().strip()  # اختیاری - می‌تونه خالی باشه
+        new_dns2 = self.dns2_entry.get().strip()
 
         old_dns = self.current_info.get("dns", "-")
         old_dns2 = self.current_info.get("dns2", "-")
         old_dns2 = "" if old_dns2 == "-" else old_dns2
 
+        # انگلیسی کردن پاپ‌آپ‌ها و پیام‌های وضعیت
         if not new_dns:
-            self.dns_msg.config(text="DNS اصلی نمی‌تواند خالی باشد", fg="#e74c3c")
+            self.dns_msg.config(text="Primary DNS cannot be empty", fg="#e74c3c")
             return
         if new_dns == old_dns and new_dns2 == old_dns2:
-            self.dns_msg.config(text="DNS تغییری نکرده است", fg="#e74c3c")
+            self.dns_msg.config(text="DNS has not changed", fg="#e74c3c")
             return
 
         ok, msg = set_dns(self.current_adapter, new_dns, new_dns2 or None)
@@ -341,7 +308,6 @@ class WifiApp(tk.Tk):
         new_ip = self.new_ip_entry.get().strip()
         old_ip = self.current_info.get("ipv4", "-")
         if not new_ip or new_ip == old_ip:
-            # طبق مشخصات: اگه همون قبلی بود هیچ کاری نکن (بدون ارور)
             return
         ok, msg = set_ip(self.current_adapter, new_ip)
         self.ip_msg.config(text=msg, fg="#2ecc71" if ok else "#e74c3c")

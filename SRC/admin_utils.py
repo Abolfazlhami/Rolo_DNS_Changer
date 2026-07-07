@@ -12,9 +12,8 @@ import ctypes
 
 
 def is_admin():
-    """بررسی می‌کند که آیا برنامه هم اکنون با دسترسی ادمین اجرا شده یا نه"""
     if platform.system() != "Windows":
-        return True  # روی غیر ویندوز نیازی به این بررسی نیست
+        return True
     try:
         return bool(ctypes.windll.shell32.IsUserAnAdmin())
     except Exception:
@@ -22,7 +21,6 @@ def is_admin():
 
 
 def run_as_admin():
-    """برنامه را با نمایش پرامپت UAC ویندوز و دسترسی ادمین دوباره اجرا می‌کند"""
     script = os.path.abspath(sys.argv[0])
     params = " ".join(f'"{a}"' for a in sys.argv[1:])
     try:
@@ -30,11 +28,10 @@ def run_as_admin():
             None, "runas", sys.executable, f'"{script}" {params}', None, 1
         )
     except Exception as e:
-        print("خطا در اجرای با دسترسی ادمین:", e)
+        print("Error executing with admin privileges:", e)
     sys.exit(0)
 
 
 def ensure_admin():
-    """اگر برنامه با دسترسی ادمین اجرا نشده باشد، پرامپت UAC را نشان می‌دهد"""
     if platform.system() == "Windows" and not is_admin():
         run_as_admin()
