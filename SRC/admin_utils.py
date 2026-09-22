@@ -2,7 +2,7 @@
 """
 ================================================================================
  admin_utils.py
- درخواست خودکار دسترسی ادمین (UAC) روی ویندوز
+ درخواست خودکار دسترسی ادمین (UAC) روی ویندوز + مخفی کردن پنجره‌ی CMD
 ================================================================================
 """
 import platform
@@ -35,3 +35,22 @@ def run_as_admin():
 def ensure_admin():
     if platform.system() == "Windows" and not is_admin():
         run_as_admin()
+
+
+def hide_console():
+    """
+    پنجره‌ی سیاه CMD که پشت برنامه باز می‌مونه رو مخفی می‌کنه (فقط ویندوز).
+    وقتی برنامه با python.exe اجرا میشه یه کنسول پشتش باز میشه؛ این تابع
+    اون پنجره رو با GetConsoleWindow + ShowWindow(SW_HIDE) پنهان می‌کنه.
+    اگه برنامه با pythonw.exe یا exe ساخته‌شده با --noconsole اجرا بشه،
+    اصلاً کنسولی وجود نداره و این تابع کاری انجام نمی‌ده.
+    """
+    if platform.system() != "Windows":
+        return
+    try:
+        console_window = ctypes.windll.kernel32.GetConsoleWindow()
+        if console_window:
+            SW_HIDE = 0
+            ctypes.windll.user32.ShowWindow(console_window, SW_HIDE)
+    except Exception as e:
+        print("Warning: Failed to hide console window:", e)
